@@ -5,6 +5,10 @@
 #include<ctype.h>
 #include<errno.h>
 
+/*defines*/
+
+#define CTRL_KEY(k) ((k) & 0x1f)
+
 /*Data called*/
 struct termios og_termios;
 
