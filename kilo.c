@@ -38,25 +38,57 @@ void EnableRawMode(){
 	if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetatte fail");
 }
 
+char editReadKey(){
+	int nread;
+	char c;
+	while((nread = read(STDIN_FILENO ,&c, 1)) != 1){
+		if (nread == -1 && errno != EAGAIN) die("read fail");
+	}
+	return c;
+}
+
+/*output*/
+
+void editDrawRows(){
+	int y;
+	for(y=0;y<24;y++){
+		write(STDOUT_FILENO, "-\r\n", 3);
+	}
+}
+
+
+void editRefreshScreen(){
+	write(STDOUT_FILENO, "\x1b[2J", 4);
+	write(STDOUT_FILENO , "\x1b[H", 3);
+	
+	editDrawRows();
+	
+	write(STDOUT_FILENO, "\x1b[H", 3);
+}
+
+/*input*/
+
+void editProcessKeypress(){
+	char c = editReadKey();
+	
+	switch (c) {
+		case CTRL_KEY('q'):
+		write(STDOUT_FILENO, "\x1b[2J", 4);
+		write(STDOUT_FILENO, "\x1b[H", 3);
+			exit(0);
+			break;
+		}
+	}
+
 /*init*/
 
 int main()
 {
 	EnableRawMode();
 	
-	char c;
-	
 	while (1){
-		char c = '\0';
-		if(read(STDIN_FILENO, &c ,1) == -1 && errno != EAGAIN) die("read fail");
-		
-		if(iscntrl(c)){
-			printf("%d\r\n",c);
-		}
-		else{
-			printf("%d(%c)\r\n",c,c);
-		}
-	if(c == 'q')break;
+		editRefreshScreen();
+		editProcessKeypress();
 	}
 	return 0;
 }
