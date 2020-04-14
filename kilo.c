@@ -12,6 +12,12 @@
 /*Data called*/
 struct termios og_termios;
 
+struct editConfig {
+	struct termios og_termios;
+};
+
+struct editConfig E;
+
 /*Terminal*/
 
 void die(const char *s){
@@ -20,14 +26,15 @@ void die(const char *s){
 }
 
 void DisableRawMode(){
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &og_termios);
+	if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &E.og_termios) == -1)
+		die("tcsetattr fail");
 }
 
 void EnableRawMode(){
-	if(tcgetattr(STDIN_FILENO, &og_termios) == -1) die("tcgetattr fail");
+	if(tcgetattr(STDIN_FILENO, &E.og_termios) == -1) die("tcgetattr fail");
 	atexit(DisableRawMode);
 	
-	struct termios raw = og_termios;
+	struct termios raw = E.og_termios;
 	raw.c_iflag &= ~(ICRNL | IXON | INPCK | ISTRIP | BRKINT);
 	raw.c_oflag &= ~(OPOST);
 	raw.c_cflag &= (CS8);
