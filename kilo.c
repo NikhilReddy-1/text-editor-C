@@ -4,6 +4,7 @@
 #include<stdio.h>
 #include<ctype.h>
 #include<errno.h>
+#include<sys/ioctl.h>
 
 /*defines*/
 
@@ -13,6 +14,8 @@
 struct termios og_termios;
 
 struct editConfig {
+	int screenrows;
+	int screencols;
 	struct termios og_termios;
 };
 
@@ -54,6 +57,18 @@ char editReadKey(){
 	return c;
 }
 
+int getWindowsSize(int *rows, int *cols){
+	struct winsize ws;
+	
+	if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0){
+		return -1;
+	}
+	else {
+		*cols = ws.ws_cols;
+		*rows = ws.ws_rows;
+		return 0;
+	}
+}
 /*output*/
 
 void editDrawRows(){
@@ -89,10 +104,14 @@ void editProcessKeypress(){
 
 /*init*/
 
+void initEdtior(){
+	if (getWindowsSize(&E.screenrows, &E.screencols) == -1) die("getWindowsSize");
+}
+
 int main()
 {
 	EnableRawMode();
-	
+	initEdtior();
 	while (1){
 		editRefreshScreen();
 		editProcessKeypress();
