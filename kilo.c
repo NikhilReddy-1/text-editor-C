@@ -64,8 +64,8 @@ int getWindowsSize(int *rows, int *cols){
 		return -1;
 	}
 	else {
-		*cols = ws.ws_cols;
-		*rows = ws.ws_rows;
+		*cols = ws.ws_col;
+		*rows = ws.ws_row;
 		return 0;
 	}
 }
@@ -73,7 +73,7 @@ int getWindowsSize(int *rows, int *cols){
 
 void editDrawRows(){
 	int y;
-	for(y=0;y<24;y++){
+	for(y=0;y< E.screenrows;y++){
 		write(STDOUT_FILENO, "-\r\n", 3);
 	}
 }
